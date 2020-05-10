@@ -1,3 +1,4 @@
 images/*
 beauty_predict/__pycache__/*
 debug.log
+secrets.py
