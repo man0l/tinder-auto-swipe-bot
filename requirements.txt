@@ -1,2 +1,9 @@
 selenium==3.141.0
+webdriver_manager
 goto-statement==1.2
+requests
+os
+keras
+dlib
+opencv
+tensorflow
