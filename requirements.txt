@@ -8,3 +8,4 @@ dlib
 opencv
 tensorflow
 py-trello
+trello

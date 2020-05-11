@@ -113,10 +113,7 @@ class TinderAutoSwipeBot():
         name_node = self.driver.find_element_by_xpath('//*[@id="content"]/div/div[1]/div/main/div[1]/div/div/div[1]/div/div[1]/div[3]/div[6]/div/div[1]/div/div/span')
         name = name_node.get_attribute('innerText')
         div_image = self.driver.find_element_by_css_selector('[aria-label="'+name+'"]')
-        bodyHTML = div_image.get_attribute('style')
-        #body = self.driver.find_element_by_xpath('//*[@id="Tinder"]/body')
-        #bodyHTML = body.get_attribute('innerHTML')
-        #startMarker = '<div class="Bdrs(8px) Bgz(cv) Bgp(c) StretchedBox" style="background-image: url(&quot;'
+        bodyHTML = div_image.get_attribute('style')        
         startMarker = 'background-image: url(&quot;'
         endMarker = '");'
 
