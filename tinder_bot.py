@@ -8,6 +8,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 import requests, os
 from beauty_predict import scores
+import re
 
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 
@@ -133,6 +134,15 @@ class TinderAutoSwipeBot():
         self.current_image = outPath
         download_image(url, outPath)
         return scores(outPath)
+    def get_matches(self):
+        sleep(3)
+        image_element = self.driver.find_element_by_css_selector('#matchListNoMessages div.recCard__img')
+        print(image_element)
+        image_url = image_element.get_attribute('style')
+        print(image_url)
+        result = re.match(r'url\("(https:\/\/.*?)"\)', image_url)
+        print(result)
+
 
 @with_goto
 def main():
