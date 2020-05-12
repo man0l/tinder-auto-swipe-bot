@@ -2,5 +2,6 @@ images/*
 beauty_predict/__pycache__/*
 __pycache__/*
 .vscode
+.vscode/*
 debug.log
 secrets.py
