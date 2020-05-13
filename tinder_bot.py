@@ -162,7 +162,7 @@ class TinderAutoSwipeBot():
 
         all_matches = ref.get()
         for i in all_matches:
-            if all_matches[i]['hash'] == hash(match['image']):
+            if 'hash' in all_matches[i] and all_matches[i]['hash'] == hash(match['image']):
                 return None
         
         ref.push({
