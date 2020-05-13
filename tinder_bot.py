@@ -152,7 +152,7 @@ class TinderAutoSwipeBot():
         cred = credentials.Certificate(firebase_service_account_path)
         app = firebase_admin.initialize_app(cred, {
             'databaseUrl': firebase_url
-        })
+        }, 'tinder-bot')
         return db.reference('/matches', app, firebase_url)
     def post_firebase(self, match={}):
         if 'username' not in match: 
