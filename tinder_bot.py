@@ -171,12 +171,6 @@ class TinderAutoSwipeBot():
             'hash': hash(match['image'])
         })
         return None
-    def search_firebase(self, matches):
-        
-
-
-
-
 
 @with_goto
 def main():
