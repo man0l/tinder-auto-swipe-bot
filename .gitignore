@@ -4,3 +4,4 @@ __pycache__/*
 .vscode/*
 debug.log
 secrets.py
+service_accounts

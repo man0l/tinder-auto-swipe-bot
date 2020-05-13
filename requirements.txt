@@ -9,3 +9,5 @@ opencv
 tensorflow
 py-trello
 trello
+firebase
+firebase_admin

@@ -8,7 +8,11 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 import requests, os
 from beauty_predict import scores
-import re
+from secrets import firebase_pass, firebase_user, firebase_url, firebase_service_account_path
+from firebase import firebase
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import db
 
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 
@@ -115,6 +119,23 @@ class TinderAutoSwipeBot():
         name = name_node.get_attribute('innerText')
         div_image = self.driver.find_element_by_css_selector('[aria-label="'+name+'"]')
         bodyHTML = div_image.get_attribute('style')        
+        return self.parse_url(bodyHTML)
+
+    def get_matches(self):
+        sleep(3)
+        image_elements = self.driver.find_elements_by_css_selector('#matchListNoMessages div.recCard__img')
+        for image_element in image_elements:
+            image_url = image_element.get_attribute('style')        
+            name = image_element.get_attribute('aria-label')
+            if name and image_url:
+                result = self.parse_url(image_url)
+                # authentication in firebase and save it in firebase database
+                self.post_firebase({
+                    'username': name,
+                    'image': image_url
+                })
+        
+    def parse_url(self, bodyHTML):
         startMarker = 'background-image: url(&quot;'
         endMarker = '");'
 
@@ -127,21 +148,34 @@ class TinderAutoSwipeBot():
         self.begining = False
         urlEnd = bodyHTML.find(endMarker, urlStart)        
         return "http"+bodyHTML[urlStart:urlEnd]
+    def init_firebase(self):
+        cred = credentials.Certificate(firebase_service_account_path)
+        app = firebase_admin.initialize_app(cred, {
+            'databaseUrl': firebase_url
+        })
+        return db.reference('/matches', app, firebase_url)
+    def post_firebase(self, match={}):
+        if 'username' not in match: 
+            return None
 
-    def current_scores(self):
-        url = self.get_image_path()
-        outPath = os.path.join(APP_ROOT, 'images', os.path.basename(url))
-        self.current_image = outPath
-        download_image(url, outPath)
-        return scores(outPath)
-    def get_matches(self):
-        sleep(3)
-        image_element = self.driver.find_element_by_css_selector('#matchListNoMessages div.recCard__img')
-        print(image_element)
-        image_url = image_element.get_attribute('style')
-        print(image_url)
-        result = re.match(r'url\("(https:\/\/.*?)"\)', image_url)
-        print(result)
+        ref = self.init_firebase()
+
+        all_matches = ref.get()
+        for i in all_matches:
+            if all_matches[i]['hash'] == hash(match['image']):
+                return None
+        
+        ref.push({
+            'username': match['username'],
+            'image': match['image'],
+            'hash': hash(match['image'])
+        })
+        return None
+    def search_firebase(self, matches):
+        
+
+
+
 
 
 @with_goto
