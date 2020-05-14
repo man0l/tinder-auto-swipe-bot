@@ -1,13 +1,9 @@
 from trello import TrelloApi
-from secrets import trello_api_key, trello_api_secret, trello_token, trello_token_secret, trello_crm_board_id
+from secrets import trello_api_key, trello_api_secret, trello_token, trello_token_secret, trello_crm_board_id, trello_crm_list_id
 from goto import with_goto
 from tinder_bot import TinderAutoSwipeBot
 trello = TrelloApi(trello_api_key)
 trello.set_token(trello_token_secret)
-
-#boards = trello.boards.get(trello_crm_board_id)
-
-#print(boards)
 
 @with_goto
 def main():
@@ -27,7 +23,15 @@ def main():
     label.begin
     answer = input("Have you logged in? (Yes | 1): ")
     if answer.lower() == '1' or answer.lower() == 'yes':
-        bot.get_matches()
+        matches = bot.get_matches()
+        print(matches)
+        for match in matches:
+            if 'hash' in match:
+                print('hash in match')
+                card = trello.cards.new(match, trello_crm_list_id)
+                print(card)
+                if 'id' in card:
+                    trello.cards.new_attachment(card['id'], None, match['image'])
     else:
         print("Enter Correct Value: Yes or 1")
         goto.begin

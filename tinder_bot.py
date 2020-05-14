@@ -124,17 +124,21 @@ class TinderAutoSwipeBot():
 
     def get_matches(self):
         sleep(3)
+        matches = []
         image_elements = self.driver.find_elements_by_css_selector('#matchListNoMessages div.recCard__img')
         for image_element in image_elements:
             image_url = image_element.get_attribute('style')        
             name = image_element.get_attribute('aria-label')
             if name and image_url:
                 result = self.parse_url(image_url)
-                # authentication in firebase and save it in firebase database
-                self.post_firebase({
+                match = {
                     'username': name,
-                    'image': result
-                })
+                    'image': result,
+                    'hash': hash(result)
+                }
+                if self.post_firebase(match):
+                    matches.append(match)
+        return matches
         
     def parse_url(self, bodyHTML):
         startMarker = 'background-image: url(&quot;'
@@ -160,7 +164,7 @@ class TinderAutoSwipeBot():
         return self.firebase
     def post_firebase(self, match={}):
         if 'username' not in match: 
-            return None
+            return False
 
         ref = self.init_firebase()
 
@@ -168,14 +172,14 @@ class TinderAutoSwipeBot():
         if all_matches:
             for i in all_matches:
                 if 'hash' in all_matches[i] and all_matches[i]['hash'] == hash(match['image']):
-                    return None
+                    return False
             
         ref.push({
             'username': match['username'],
             'image': match['image'],
-            'hash': hash(match['image'])
+            'hash': match['hash']
         })
-        return None
+        return True
 
 @with_goto
 def main():
