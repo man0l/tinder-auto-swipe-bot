@@ -28,7 +28,7 @@ def main():
         for match in matches:
             if 'hash' in match:
                 print('hash in match')
-                card = trello.cards.new(match, trello_crm_list_id)
+                card = trello.cards.new(match['username'], trello_crm_list_id)
                 print(card)
                 if 'id' in card:
                     trello.cards.new_attachment(card['id'], None, match['image'])
