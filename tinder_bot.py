@@ -30,6 +30,7 @@ class TinderAutoSwipeBot():
         self.likes_num = 0
         self.dislikes_num = 0
         self.swipes_thresold = 100
+        self.firebase = None
 
     # Open New Browser window with Tinder Web
     def login(self):
@@ -132,7 +133,7 @@ class TinderAutoSwipeBot():
                 # authentication in firebase and save it in firebase database
                 self.post_firebase({
                     'username': name,
-                    'image': image_url
+                    'image': result
                 })
         
     def parse_url(self, bodyHTML):
@@ -149,11 +150,14 @@ class TinderAutoSwipeBot():
         urlEnd = bodyHTML.find(endMarker, urlStart)        
         return "http"+bodyHTML[urlStart:urlEnd]
     def init_firebase(self):
+        if self.firebase is not None:
+            return self.firebase
         cred = credentials.Certificate(firebase_service_account_path)
         app = firebase_admin.initialize_app(cred, {
             'databaseUrl': firebase_url
         }, 'tinder-bot')
-        return db.reference('/matches', app, firebase_url)
+        self.firebase = db.reference('/matches', app, firebase_url)
+        return self.firebase
     def post_firebase(self, match={}):
         if 'username' not in match: 
             return None
@@ -161,10 +165,11 @@ class TinderAutoSwipeBot():
         ref = self.init_firebase()
 
         all_matches = ref.get()
-        for i in all_matches:
-            if 'hash' in all_matches[i] and all_matches[i]['hash'] == hash(match['image']):
-                return None
-        
+        if all_matches:
+            for i in all_matches:
+                if 'hash' in all_matches[i] and all_matches[i]['hash'] == hash(match['image']):
+                    return None
+            
         ref.push({
             'username': match['username'],
             'image': match['image'],
