@@ -1,7 +1,9 @@
 from trello import TrelloApi
-from secrets import trello_api_key, trello_api_secret, trello_token, trello_token_secret, trello_crm_board_id, trello_crm_list_id
+from secrets import trello_api_key, trello_api_secret, trello_token, trello_token_secret, trello_crm_board_id, trello_crm_list_id, trello_template, trello_checklist
 from goto import with_goto
 from tinder_bot import TinderAutoSwipeBot
+from utils import get_utf8_contents, create_trello_card
+
 trello = TrelloApi(trello_api_key)
 trello.set_token(trello_token_secret)
 
@@ -24,14 +26,10 @@ def main():
     answer = input("Have you logged in? (Yes | 1): ")
     if answer.lower() == '1' or answer.lower() == 'yes':
         matches = bot.get_matches()
-        print(matches)
-        for match in matches:
-            if 'hash' in match:
-                print('hash in match')
-                card = trello.cards.new(match['username'], trello_crm_list_id)
-                print(card)
-                if 'id' in card:
-                    trello.cards.new_attachment(card['id'], None, match['image'])
+        if len(matches) > 0:
+            gen = (match for match in matches if 'hash' in match) 
+            for match in gen:
+                create_trello_card(trello, match)
     else:
         print("Enter Correct Value: Yes or 1")
         goto.begin

@@ -5,3 +5,4 @@ __pycache__/*
 debug.log
 secrets.py
 service_accounts
+trello-template.md

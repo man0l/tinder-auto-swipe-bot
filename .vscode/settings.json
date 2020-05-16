@@ -1,3 +1,5 @@
 {
-    "python.pythonPath": "C:\\Users\\man0l\\Anaconda3\\envs\\tinder-ai-swipe\\python.exe"
+    "python.pythonPath": "C:\\Users\\man0l\\Anaconda3\\envs\\tinder-ai-swipe\\python.exe",
+    "files.encoding": "utf8",
+    "files.autoGuessEncoding": false
 }

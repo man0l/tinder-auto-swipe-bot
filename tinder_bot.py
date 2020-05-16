@@ -13,6 +13,7 @@ from firebase import firebase
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import db
+import hashlib
 
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 
@@ -134,7 +135,7 @@ class TinderAutoSwipeBot():
                 match = {
                     'username': name,
                     'image': result,
-                    'hash': hash(result)
+                    'hash': hashlib.sha256(result.encode('utf-8')).hexdigest()
                 }
                 if self.post_firebase(match):
                     matches.append(match)
@@ -171,7 +172,7 @@ class TinderAutoSwipeBot():
         all_matches = ref.get()
         if all_matches:
             for i in all_matches:
-                if 'hash' in all_matches[i] and all_matches[i]['hash'] == hash(match['image']):
+                if 'hash' in all_matches[i] and all_matches[i]['hash'] == hashlib.sha256(match['image'].encode('utf-8')).hexdigest():
                     return False
             
         ref.push({
