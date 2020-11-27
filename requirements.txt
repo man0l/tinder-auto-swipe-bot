@@ -2,10 +2,10 @@ selenium==3.141.0
 webdriver_manager
 goto-statement==1.2
 requests
-os
+py-os
 keras
-dlib
-opencv
+dlib # requires cmake
+libopencv
 tensorflow
 py-trello
 trello
