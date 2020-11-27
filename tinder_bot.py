@@ -8,6 +8,12 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 import requests, os
 from beauty_predict import scores
+from secrets import firebase_pass, firebase_user, firebase_url, firebase_service_account_path
+from firebase import firebase
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import db
+import hashlib
 
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 
@@ -25,6 +31,7 @@ class TinderAutoSwipeBot():
         self.likes_num = 0
         self.dislikes_num = 0
         self.swipes_thresold = 100
+        self.firebase = None
 
     # Open New Browser window with Tinder Web
     def login(self):
@@ -114,6 +121,27 @@ class TinderAutoSwipeBot():
         name = name_node.get_attribute('innerText')
         div_image = self.driver.find_element_by_css_selector('[aria-label="'+name+'"]')
         bodyHTML = div_image.get_attribute('style')        
+        return self.parse_url(bodyHTML)
+
+    def get_matches(self):
+        sleep(3)
+        matches = []
+        image_elements = self.driver.find_elements_by_css_selector('#matchListNoMessages div.recCard__img')
+        for image_element in image_elements:
+            image_url = image_element.get_attribute('style')        
+            name = image_element.get_attribute('aria-label')
+            if name and image_url:
+                result = self.parse_url(image_url)
+                match = {
+                    'username': name,
+                    'image': result,
+                    'hash': hashlib.sha256(result.encode('utf-8')).hexdigest()
+                }
+                if self.post_firebase(match):
+                    matches.append(match)
+        return matches
+        
+    def parse_url(self, bodyHTML):
         startMarker = 'background-image: url(&quot;'
         endMarker = '");'
 
@@ -126,13 +154,33 @@ class TinderAutoSwipeBot():
         self.begining = False
         urlEnd = bodyHTML.find(endMarker, urlStart)        
         return "http"+bodyHTML[urlStart:urlEnd]
+    def init_firebase(self):
+        if self.firebase is not None:
+            return self.firebase
+        cred = credentials.Certificate(firebase_service_account_path)
+        app = firebase_admin.initialize_app(cred, {
+            'databaseUrl': firebase_url
+        }, 'tinder-bot')
+        self.firebase = db.reference('/matches', app, firebase_url)
+        return self.firebase
+    def post_firebase(self, match={}):
+        if 'username' not in match: 
+            return False
 
-    def current_scores(self):
-        url = self.get_image_path()
-        outPath = os.path.join(APP_ROOT, 'images', os.path.basename(url))
-        self.current_image = outPath
-        download_image(url, outPath)
-        return scores(outPath)
+        ref = self.init_firebase()
+
+        all_matches = ref.get()
+        if all_matches:
+            for i in all_matches:
+                if 'hash' in all_matches[i] and all_matches[i]['hash'] == hashlib.sha256(match['image'].encode('utf-8')).hexdigest():
+                    return False
+            
+        ref.push({
+            'username': match['username'],
+            'image': match['image'],
+            'hash': match['hash']
+        })
+        return True
 
 @with_goto
 def main():

@@ -3,3 +3,7 @@ trello_api_secret=''
 trello_token=''
 trello_token_secret=''
 trello_crm_board_id=''
+trello_checklist=[]
+firebase_user=''
+firebase_pass=''
+firebase_service_account_path=''

@@ -7,4 +7,7 @@ keras
 dlib # requires cmake
 libopencv
 tensorflow
+py-trello
 trello
+firebase
+firebase_admin
